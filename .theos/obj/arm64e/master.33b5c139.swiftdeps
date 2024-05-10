@@ -1,0 +1,13 @@
+version: "Apple Swift version 5.7.2 (swiftlang-5.7.2.135.5 clang-1400.0.29.51)"
+options: "cc92fa8b8561e9c387af766b854da11a990b9d39e3b96aae65ce78c7c436f872"
+build_start_time: [1715341398, 411211013]
+build_end_time: [1715341399, 271216869]
+inputs:
+  "/Users/tobiasrehberg/Documents/Developer/Projects/pokeboxreborn/.theos/obj/arm64e/generated/PokeboxReborn.xc.swift": [1715341398, 2802610]
+  "Sources/PokeboxReborn/Extensions/Double+rounded.swift": [1714481054, 116198539]
+  "Sources/PokeboxReborn/Extensions/UIView+asImage.swift": [1715338466, 595452308]
+  "Sources/PokeboxReborn/Helpers/DictionaryConvertor.swift": [1715255754, 758730888]
+  "Sources/PokeboxReborn/Preferences/Models/SettingsModel.swift": [1715255754, 764093399]
+  "Sources/PokeboxReborn/Preferences/TweakPreferences.swift": [1715255754, 0]
+  "Sources/PokeboxReborn/RemoteLog.swift": [1712925279, 16862392]
+  "Sources/PokeboxReborn/Tweak.x.swift": [1715338466, 0]

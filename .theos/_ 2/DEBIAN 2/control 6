@@ -1,0 +1,10 @@
+Package: com.pkgfiles.pokeboxreborn
+Name: Pokébox Reborn
+Description: Pokémon style notifications!
+Maintainer: pkgFiles
+Author: pkgFiles
+Section: Tweaks
+Depends: dev.theos.orion (>= 1.0.0), firmware (>= 12.2)
+Architecture: iphoneos-arm64
+Version: 0.0.1-693+debug
+Installed-Size: 1260

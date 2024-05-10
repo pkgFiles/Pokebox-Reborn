@@ -1,0 +1,4 @@
+module PokeboxRebornC {
+    umbrella "."
+    export *
+}
