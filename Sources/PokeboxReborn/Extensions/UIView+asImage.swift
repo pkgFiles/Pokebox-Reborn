@@ -1,5 +1,14 @@
 import UIKit
 
+let defaultAssetsPath: String = {
+    var path: String = "/var/jb/Library/Application Support/Pokebox/"
+    if !FileManager.default.fileExists(atPath: path) {
+        path = "/Library/Application Support/Pokebox/"
+    }
+    
+    return path
+}()
+
 extension UIView {
 
     // Using a function since `var image` might conflict with an existing variable

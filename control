@@ -1,6 +1,6 @@
 Package: com.pkgfiles.pokeboxreborn
 Name: Pokébox Reborn
-Version: 1.0
+Version: 1.0.1
 Architecture: iphoneos-arm
 Description: Pokémon style notifications!
 Maintainer: pkgFiles

@@ -18,7 +18,7 @@ class RootListController: PSListController, UNUserNotificationCenterDelegate {
         pokeView.backgroundColor = traitCollection.userInterfaceStyle == .light ? UIColor.black : UIColor.white
         
         //pokeImage
-        if let pokeImage = UIImage(contentsOfFile: "/var/jb/Library/PreferenceBundles/PokeboxRebornPrefs.bundle/pikachu.png") {
+        if let pokeImage = UIImage(contentsOfFile: prefsAssetsPath + "pikachu.png") {
             pokeImageView.image = pokeImage
             pokeImageView.contentMode = .scaleAspectFit
             pokeImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -111,7 +111,7 @@ class RootListController: PSListController, UNUserNotificationCenterDelegate {
                 appearance.shadowColor = UIColor.clear
                 
                 // NavigationBar icon
-                let imagePath: String = "/var/jb/Library/PreferenceBundles/PokeboxRebornPrefs.bundle/icon.png"
+                let imagePath: String = prefsAssetsPath + "icon.png"
                 let iconView = UIImageView(frame: CGRect(x: bar.frame.maxX / 2, y: bar.frame.maxY / 2, width: 29, height: 29))
                 iconView.image = UIImage(contentsOfFile: imagePath)
                 navigationItem.titleView = iconView

@@ -3,6 +3,15 @@ import PokeboxRebornPrefsC
 
 extension RootListController {
     
+    var prefsAssetsPath: String {
+        var path: String = "/var/jb/Library/PreferenceBundles/PokeboxRebornPrefs.bundle/"
+        if !FileManager.default.fileExists(atPath: path) {
+            path = "/Library/PreferenceBundles/PokeboxRebornPrefs.bundle/"
+        }
+        
+        return path
+    }
+    
     private var plistPath: String {
         let fileManager = FileManager()
         var plistPath: String = "/var/mobile/Library/Preferences/"

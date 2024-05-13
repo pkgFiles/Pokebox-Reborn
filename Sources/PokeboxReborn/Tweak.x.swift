@@ -77,7 +77,7 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         //Background Image
         if self.backgroundImageView == nil {
             backgroundImageView = UIImageView(frame: target.viewForPreview.bounds)
-            backgroundImageView?.image = getImageForStyle("/var/jb/Library/Application Support/Pokebox/").resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 100, bottom: 35, right: 100), resizingMode: .stretch)
+            backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 100, bottom: 35, right: 100), resizingMode: .stretch)
             target.viewForPreview.insertSubview(backgroundImageView!, at: 0)
         }
         
@@ -295,12 +295,10 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
     
     //orion:new
     func getFontForStyle(_ size: CGFloat) -> UIFont {
-        let ttfPath: String = "/var/jb/Library/Application Support/Pokebox/"
-        
         switch PokeboxFont.getFont() {
-        case .defaultFont: return UIFont(ttfAtPath: ttfPath + "silkscreen-bold.ttf", size: size)
-        case .pokemonFont: return UIFont(ttfAtPath: ttfPath + "pokemon.ttf", size: size)
-        case .silkscreenFont: return UIFont(ttfAtPath: ttfPath + "silkscreen.ttf", size: size)
+        case .defaultFont: return UIFont(ttfAtPath: defaultAssetsPath + "silkscreen-bold.ttf", size: size)
+        case .pokemonFont: return UIFont(ttfAtPath: defaultAssetsPath + "pokemon.ttf", size: size)
+        case .silkscreenFont: return UIFont(ttfAtPath: defaultAssetsPath + "silkscreen.ttf", size: size)
         }
     }
     
