@@ -66,10 +66,10 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
     typealias Group = TweakEnabled
     @Property var backgroundImageView: UIImageView?
     @Property var originalSecondaryText: NSString?
-
+    
     func viewDidLayoutSubviews() {
         orig.viewDidLayoutSubviews()
-        
+                
         //Hide the original view with it's shadow
         target.viewForPreview.backgroundMaterialView.isHidden = true
         target.viewForPreview.hasShadow = false
@@ -77,12 +77,15 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         //Background Image
         if self.backgroundImageView == nil {
             backgroundImageView = UIImageView(frame: target.viewForPreview.bounds)
-            backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 100, bottom: 35, right: 100), resizingMode: .stretch)
+            if #available(iOS 16, *) {
+                backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 100, bottom: 35, right: 100), resizingMode: .stretch)
+            } else {
+                backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 20, left: 100, bottom: 20, right: 100), resizingMode: .stretch)
+            }
             target.viewForPreview.insertSubview(backgroundImageView!, at: 0)
         }
         
         if let pokeImageView = backgroundImageView {
-            if #unavailable(iOS 16.0), tweakPrefs.isOffsetEnabled { target.viewForPreview.frame.size.height += CGFloat(tweakPrefs.offsetValue) }
             pokeImageView.frame = target.viewForPreview.bounds
         }
     }
@@ -95,6 +98,9 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
                 //Hide the original notification text
                 originalSecondaryText = target.viewForPreview.secondaryText ?? ""
                 target.viewForPreview.secondaryText = " "
+                
+                let frameTimer: Timer = Timer.scheduledTimer(timeInterval: 0, target: target, selector: #selector(setBoundsWhileAnimating(_:)), userInfo: nil, repeats: true)
+                frameTimer.fire()
                 
                 /*
                 var padText: NSString = " "
@@ -153,6 +159,17 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
     }
     
     //orion:new
+    func setBoundsWhileAnimating(_ timer: Timer) {
+        guard let imageView = backgroundImageView else { return }
+        
+        if originalSecondaryText == target.viewForPreview.secondaryText && timer.isValid { timer.invalidate(); return } else {
+            let notificationContentView: NCNotificationSeamlessContentView = target.viewForPreview.value(forKey: "_notificationContentView") as! NCNotificationSeamlessContentView
+            let crossfadingContentView: UIView = notificationContentView.value(forKey: "crossfadingContentView") as! UIView
+            imageView.frame = crossfadingContentView.bounds
+        }
+    }
+    
+    //orion:new
     func getImageForStyle(_ imagePath: String) -> UIImage {
         var imageName: String = ""
      
@@ -191,13 +208,15 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
     typealias Group = TweakEnabled
     @Property var alternateDateLabel: UILabel?
     @Property var alternateImportantTextLabel: UILabel?
+    @Property var crossfadingContentView: UIView?
     
     // I'VE DIDN'T FOUND A BETTER FUNCTION TO HOOK!
     func layoutSubviews() {
         orig.layoutSubviews()
-
+        crossfadingContentView = Ivars<UIView>(target)._crossfadingContentView
+        
         if tweakPrefs.isOffsetEnabled {
-            Ivars<UILabel>(target)._secondaryTextElement.frame.origin.y += CGFloat(tweakPrefs.offsetValue)
+            Ivars<UILabel>(target)._secondaryTextElement.frame.origin.y += CGFloat(2.0)
         }
     }
     
@@ -263,22 +282,7 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
         
         alternateDateLabel?.font = dateLabel.font
         alternateImportantTextLabel?.font = importantTextLabel.font
-        
-        /*
-         let badgedIconView: UIView = Ivars<UIView>(target)._badgedIconView
-         
-         if self.alternateBadgedIconView == nil {
-             alternateBadgedIconView = UIImageView(frame: badgedIconView.frame)
-             target.addSubview(alternateBadgedIconView!)
-         }
-         
-         alternateBadgedIconView?.frame = badgedIconView.frame
-         alternateBadgedIconView?.image = badgedIconView.asImage()
-         alternateBadgedIconView?.frame.origin.y = badgedIconView.frame.origin.y + CGFloat(tweakPrefs.offsetValue / 2)
-         
-         badgedIconView.removeFromSuperview()
-        */
-        
+
         //Remove original Labels from Superview
         dateLabel.removeFromSuperview()
         importantTextLabel.removeFromSuperview()

@@ -1,0 +1,11 @@
+1.0.2
+Fixed images from having the wrong insets on iOS 15
+Autoresizing of images, line-by-line
+Removed the Offset Slider as the values are to high and cause visual glitches
+Cleaning up some parts of the code
+
+1.0.1
+Fixed rootful support
+
+1.0
+Initial Release

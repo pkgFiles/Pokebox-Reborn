@@ -5,6 +5,15 @@
 // Pokébox Headers
 #import <UserNotifications/UserNotifications.h>
 
+@protocol NCNotificationContentDisplaying
+@end
+
+@protocol NCNotificationSeamlessContentViewDelegate <NSObject>
+@end
+
+@protocol BSUIDateLabel <NSObject>
+@end
+
 @interface PLPlatterView : UIView
 @property (nonatomic, assign) CGFloat cornerRadius;
 @property (nonatomic, strong) UIView *backgroundView;
@@ -20,7 +29,9 @@
 @property (nonatomic, retain) UILabel *dateLabel;
 @end
 
-@interface NCNotificationShortLookView : PLPlatterView
+@interface NCNotificationShortLookView : PLPlatterView {
+    UIView<NCNotificationContentDisplaying> * _notificationContentView;
+}
 @property (nonatomic, retain) UIView *backgroundMaterialView;
 @property (assign, nonatomic) BOOL hasShadow;
 @property (nonatomic, retain) NCNotificationContentView *notificationContentView;
@@ -37,13 +48,8 @@
 @property (nonatomic, assign) NSArray<UIImage *> *icons;
 @end
 
-@protocol NCNotificationSeamlessContentViewDelegate <NSObject>
-@end
-
-@protocol BSUIDateLabel <NSObject>
-@end
-
 @interface NCNotificationSeamlessContentView : UIView {
+    UIView * _crossfadingContentView;
     UILabel * _primaryTextLabel;
     UILabel * _primarySubtitleTextLabel;
     UILabel * _importantTextLabel;
