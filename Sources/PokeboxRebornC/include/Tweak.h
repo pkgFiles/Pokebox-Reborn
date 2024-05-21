@@ -65,6 +65,7 @@
 @property (nonatomic, copy) NSString *footerText;
 @property (nonatomic, copy) NSString *summaryText;
 - (CGRect)_textFrameForBounds:(CGRect)arg1;
+- (CGSize)sizeThatFits:(CGSize)arg1 ;
 @end
 
 @interface NCNotificationRequest : NSObject

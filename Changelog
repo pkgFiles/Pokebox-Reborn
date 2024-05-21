@@ -1,3 +1,10 @@
+1.1
+Fixed notification size on iOS 15 devices
+Fixed the realignment of some Labels by rewriting the mechanism for their color change
+Fixed unnecessary code
+Improved performance
+Removed unused code for the animations as they work fine
+
 1.0.2
 Fixed images from having the wrong insets on iOS 15
 Added autoresizing of images, line-by-line

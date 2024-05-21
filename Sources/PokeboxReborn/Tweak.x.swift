@@ -87,6 +87,7 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         
         if let pokeImageView = backgroundImageView {
             pokeImageView.frame = target.viewForPreview.bounds
+            if tweakPrefs.style != 0 { colorFilteredLabels() }
         }
     }
     
@@ -99,19 +100,8 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
                 originalSecondaryText = target.viewForPreview.secondaryText ?? ""
                 target.viewForPreview.secondaryText = " "
                 
-                let frameTimer: Timer = Timer.scheduledTimer(timeInterval: 0, target: target, selector: #selector(setBoundsWhileAnimating(_:)), userInfo: nil, repeats: true)
-                frameTimer.fire()
-                
-                /*
-                var padText: NSString = " "
-                for i in 0...target.viewForPreview.secondaryText.length {
-                    if target.viewForPreview.secondaryText.utf8String?[i] == CChar("\n") {
-                        padText = NSString.localizedStringWithFormat("%@\n", padText)
-                    } else {
-                        padText = NSString.localizedStringWithFormat("%@⠀", padText)
-                    }
-                }
-                */
+                let timer: Timer = Timer.scheduledTimer(timeInterval: 0, target: target, selector: #selector(setBoundsWhileAnimating(_:)), userInfo: nil, repeats: true)
+                timer.fire()
             }
         }
     }
@@ -132,6 +122,24 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
                 let timer: Timer = Timer.scheduledTimer(timeInterval: Double(tweakPrefs.animationSpeed).rounded(toPlaces: 2), target: target, selector: #selector(animateText(_:)), userInfo: dict, repeats: true)
                 timer.fire()
             }
+        }
+    }
+    
+    //orion:new
+    func colorFilteredLabels() {
+        //Some UILabels attributes can't be changed, even trying to modify NSAttributedStringKey fails.
+        //It seems that @Skitty has hooked for that reason the UILabel class, which is not an really good idea.
+        //This is my way to fix all the colors of the Labels.
+        guard let notificationContentView: NCNotificationSeamlessContentView = target.viewForPreview.value(forKey: "_notificationContentView") as? NCNotificationSeamlessContentView else { return }
+        
+        if let dateLabel: UILabel = notificationContentView.value(forKey: "_dateLabel") as? UILabel {
+            dateLabel.layer.filters = nil
+            dateLabel.textColor = UIColor.gray
+        }
+        
+        if let importantTextLabel: UILabel = notificationContentView.value(forKey: "_importantTextLabel") as? UILabel {
+            importantTextLabel.layer.filters = nil
+            importantTextLabel.textColor = UIColor.gray
         }
     }
     
@@ -160,12 +168,12 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
     
     //orion:new
     func setBoundsWhileAnimating(_ timer: Timer) {
-        guard let imageView = backgroundImageView else { return }
+        guard let pokeImageView = backgroundImageView else { return }
         
         if originalSecondaryText == target.viewForPreview.secondaryText && timer.isValid { timer.invalidate(); return } else {
             let notificationContentView: NCNotificationSeamlessContentView = target.viewForPreview.value(forKey: "_notificationContentView") as! NCNotificationSeamlessContentView
-            let crossfadingContentView: UIView = notificationContentView.value(forKey: "crossfadingContentView") as! UIView
-            imageView.frame = crossfadingContentView.bounds
+            let crossfadingContentView: UIView = notificationContentView.value(forKey: "_crossfadingContentView") as! UIView
+            pokeImageView.frame = crossfadingContentView.bounds
         }
     }
     
@@ -206,14 +214,10 @@ class NCNotificationCornerRadiusHook: ClassHook<NCNotificationShortLookView> {
 
 class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
     typealias Group = TweakEnabled
-    @Property var alternateDateLabel: UILabel?
-    @Property var alternateImportantTextLabel: UILabel?
-    @Property var crossfadingContentView: UIView?
     
     // I'VE DIDN'T FOUND A BETTER FUNCTION TO HOOK!
     func layoutSubviews() {
         orig.layoutSubviews()
-        crossfadingContentView = Ivars<UIView>(target)._crossfadingContentView
         
         if tweakPrefs.isOffsetEnabled {
             Ivars<UILabel>(target)._secondaryTextElement.frame.origin.y += CGFloat(2.0)
@@ -246,55 +250,21 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
                 footerTextLabel.textColor = newTextColor
                 secondaryTextElement.textColor = newTextColor
             }
-            
-            if tweakPrefs.style != 0 {
-                createAlternativeLabels()
-            }
         }
-        
         return orig._textFrameForBounds(frame)
     }
     
-    //orion:new
-    func createAlternativeLabels() {
-        //Some UILabels attributes can't be changed, even trying to modify NSAttributedStringKey fails.
-        //It seems that @Skitty has hooked for that reason the UILabel class, which is not an really good idea.
-        //This is my way to fix all the colors of the Labels.
-        
-        //Get the original Labels with its attributes:
-        let dateLabel: UILabel = Ivars<UILabel>(target)._dateLabel
-        let importantTextLabel: UILabel = Ivars<UILabel>(target)._importantTextLabel
-        
-        //Setup alternativeLabels
-        if self.alternateDateLabel == nil {
-            alternateDateLabel = initAlternateLabel(origFrame: dateLabel.frame)
-        }
-        
-        if self.alternateImportantTextLabel == nil {
-            alternateImportantTextLabel = initAlternateLabel(origFrame: importantTextLabel.frame)
-        }
-        
-        alternateDateLabel?.frame = dateLabel.frame
-        alternateImportantTextLabel?.frame = importantTextLabel.frame
-        
-        alternateDateLabel?.text = dateLabel.text
-        alternateImportantTextLabel?.text = importantTextLabel.text
-        
-        alternateDateLabel?.font = dateLabel.font
-        alternateImportantTextLabel?.font = importantTextLabel.font
-
-        //Remove original Labels from Superview
-        dateLabel.removeFromSuperview()
-        importantTextLabel.removeFromSuperview()
-    }
-    
-    //orion:new
-    func initAlternateLabel(origFrame: CGRect) -> UILabel {
-        let label = UILabel(frame: origFrame)
-        label.textColor = UIColor.gray
-        target.addSubview(label)
-        
-        return label
+    func sizeThatFits(_ size: CGSize) -> CGSize {
+        let origSize = orig.sizeThatFits(size)
+        if #unavailable(iOS 16) {
+            let newSize: CGRect = {
+                switch origSize.height {
+                case 0...60: return CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height).insetBy(dx: 0, dy: -4)
+                default: return CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height).insetBy(dx: 0, dy: -2)
+                }
+            }()
+            return newSize.size
+        } else { return origSize }
     }
     
     //orion:new
@@ -313,7 +283,6 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
         case 2: return UIColor.white
         default: break
         }
-        
         return nil
     }
 }
