@@ -6,7 +6,7 @@ Description: Pokémon style notifications!
 Maintainer: pkgFiles
 Author: pkgFiles
 Section: Tweaks
-Depends: ${ORION}, firmware (>= 15.0)
+Depends: dev.theos.orion14, firmware (>= 15.0)
 SileoDepiction: https://pkgfiles.github.io/sileodepictions/com.pkgfiles.pokeboxreborn/depiction.json
 Depiction: https://pkgfiles.github.io/depictions/?p=com.pkgfiles.pokeboxreborn
 Icon: https://raw.githubusercontent.com/pkgFiles/pkgfiles.github.io/main/assets/TweakIcons/PokeboxReborn.png
