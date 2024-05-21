@@ -1,5 +1,6 @@
 1.1.1
 Fixed dependencies dont get installed with the tweak. This should fix that some people was never be able to use this tweak
+This should fix that some people was never be able to use this tweak
 
 1.1
 Fixed notification size on iOS 15 devices
