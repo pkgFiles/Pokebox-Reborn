@@ -1,3 +1,10 @@
+2.0
+Added Velvet2 compatibility layer
+Fixed the alignment of the title which can cause overlapping
+Readded the offset slider which works fine since the autoresizing function
+Removed assets which are no longer needed
+Bugfixes and improvements
+
 1.1.1
 Fixed dependencies dont get installed with the tweak
 This should fix that some people was never be able to use this tweak

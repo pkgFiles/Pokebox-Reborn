@@ -20,6 +20,9 @@
 @property (nonatomic, retain) UIImageView *backgroundImageView;
 @end
 
+@interface MTMaterialView : UIView
+@end
+
 @interface NCNotificationContentView : UIView
 @end
 
@@ -30,13 +33,13 @@
 @end
 
 @interface NCNotificationShortLookView : PLPlatterView {
-    UIView<NCNotificationContentDisplaying> * _notificationContentView;
+    UIView<NCNotificationContentDisplaying> *_notificationContentView;
 }
-@property (nonatomic, retain) UIView *backgroundMaterialView;
+@property (nonatomic,readonly) MTMaterialView *backgroundMaterialView;
 @property (assign, nonatomic) BOOL hasShadow;
 @property (nonatomic, retain) NCNotificationContentView *notificationContentView;
 @property (nonatomic, assign) NSString *title;
-@property (nonatomic, copy) NSString * primaryText; 
+@property (nonatomic, copy) NSString *primaryText;
 @property (nonatomic, assign) NSString *secondaryText;
 - (double)_continuousCornerRadius;
 @end
@@ -84,5 +87,6 @@
 @property (nonatomic, strong) NCNotificationShortLookView *viewForPreview;
 @property (getter=_presentedLongLookViewController,nonatomic,readonly) NCNotificationViewController * presentedLongLookViewController;
 @property (nonatomic, retain) UIImageView *backgroundImageView;
+@property (nonatomic, retain) UIImageView *backgroundColorView;
 @property (nonatomic, retain) NSString *originalSecondaryText;
 @end

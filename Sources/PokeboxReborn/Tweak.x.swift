@@ -1,11 +1,12 @@
 import Orion
 import PokeboxRebornC
 
-//Pokébox - Pokémon style notifications
-//Rewrite for modern iOS 15.0 - 16.0
-//based on original from @Skitty: https://github.com/Skittyblock/Pokebox
+//Pokébox Reborn - Pokémon style notifications
+//Rewrite for modern iOS 15.0 - 16.7.5
+//based on original from @Skittyblock: https://github.com/Skittyblock/Pokebox
 //MARK: - Variables
 let tweakPrefs: SettingsModel = TweakPreferences.preferences.settings
+var isVelvetInstalled: Bool = false
 
 // MARK: - Enums
 enum PokeboxStyle {
@@ -65,7 +66,21 @@ struct LoadingTweak: Tweak {
 class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
     typealias Group = TweakEnabled
     @Property var backgroundImageView: UIImageView?
+    @Property var backgroundColorView: UIView?
     @Property var originalSecondaryText: NSString?
+    
+    func viewDidLoad() {
+        orig.viewDidLoad()
+        
+        if !FileManager().fileExists(atPath: defaultDylibPath + "Velvet2.dylib") {
+            //Create alternative background view if Velvet2 is not installed
+            if self.backgroundColorView == nil {
+                backgroundColorView = UIView(frame: target.viewForPreview.backgroundMaterialView.frame)
+                backgroundColorView?.backgroundColor = headerViewColor()
+                target.viewForPreview.insertSubview(backgroundColorView!, at: 0)
+            }
+        } else { isVelvetInstalled = true }
+    }
     
     func viewDidLayoutSubviews() {
         orig.viewDidLayoutSubviews()
@@ -77,16 +92,14 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         //Background Image
         if self.backgroundImageView == nil {
             backgroundImageView = UIImageView(frame: target.viewForPreview.bounds)
-            if #available(iOS 16, *) {
-                backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 35, left: 100, bottom: 35, right: 100), resizingMode: .stretch)
-            } else {
-                backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 20, left: 100, bottom: 20, right: 100), resizingMode: .stretch)
-            }
-            target.viewForPreview.insertSubview(backgroundImageView!, at: 0)
+            backgroundImageView?.image = getImageForStyle(defaultAssetsPath).resizableImage(withCapInsets: UIEdgeInsets(top: 20, left: 100, bottom: 20, right: 100), resizingMode: .stretch)
+            target.viewForPreview.insertSubview(backgroundImageView!, at: 1)
         }
         
         if let pokeImageView = backgroundImageView {
             pokeImageView.frame = target.viewForPreview.bounds
+            backgroundColorView?.frame = CGRect(x: 5, y: 5, width: pokeImageView.bounds.width - 10, height: pokeImageView.bounds.height - 10)
+            target.viewForPreview.backgroundMaterialView.frame = CGRect(x: 5, y: 5, width: pokeImageView.bounds.width - 10, height: pokeImageView.bounds.height - 10)
             if tweakPrefs.style != 0 { colorFilteredLabels() }
         }
     }
@@ -110,7 +123,7 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         orig.viewDidAppear(animated)
         
         if target.delegate != nil && target.delegate.isKind(of: SBNotificationBannerDestination.self) {
-            if tweakPrefs.isAnimationEnabled {
+            if tweakPrefs.isAnimationEnabled && target.viewForPreview.secondaryText != nil {
                 //Animate text
                 let newText = originalSecondaryText ?? ""
                 target.viewForPreview.secondaryText = NSString.localizedStringWithFormat("%C", newText.character(at: 0))
@@ -149,7 +162,7 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         guard let string: NSString = dict.value(forKey: "string") as? NSString else { return }
         guard let countValue: Int = dict.value(forKey: "currentCount") as? Int else { return }
         
-        if tweakPrefs.isAnimationEnabled {
+        if tweakPrefs.isAnimationEnabled && target.viewForPreview.secondaryText != nil {
             //Animate text like Pokémon
             var currentCount: Int = countValue
             currentCount += 1
@@ -169,28 +182,44 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
     //orion:new
     func setBoundsWhileAnimating(_ timer: Timer) {
         guard let pokeImageView = backgroundImageView else { return }
+        guard let notificationContentView: NCNotificationSeamlessContentView = target.viewForPreview.value(forKey: "_notificationContentView") as? NCNotificationSeamlessContentView else { return }
+        guard let crossfadingContentView = notificationContentView.value(forKey: "_crossfadingContentView") as? UIView else { return }
         
         if originalSecondaryText == target.viewForPreview.secondaryText && timer.isValid { timer.invalidate(); return } else {
-            let notificationContentView: NCNotificationSeamlessContentView = target.viewForPreview.value(forKey: "_notificationContentView") as! NCNotificationSeamlessContentView
-            let crossfadingContentView: UIView = notificationContentView.value(forKey: "_crossfadingContentView") as! UIView
+            //Always change the frame of the @property backgroundImageView
             pokeImageView.frame = crossfadingContentView.bounds
+            
+            //change the frame of the @property backgroundColorView and the Velvet2 layer
+            if let colorView = backgroundColorView {
+                colorView.frame = CGRect(x: 5, y: 5, width: pokeImageView.bounds.width - 10, height: pokeImageView.bounds.height - 10)
+            } else {
+                guard let backgroundMaterialSuperview = target.viewForPreview.backgroundMaterialView.superview else { return }
+                for subview in backgroundMaterialSuperview.subviews {
+                    if subview.isKind(of: UIView.self) {
+                        let origBounds = subview.bounds
+                        if subview.frame != origBounds {
+                            subview.frame = CGRect(x: 5, y: 5, width: pokeImageView.bounds.width - 10, height: pokeImageView.bounds.height - 10)
+                        }
+                    }
+                }
+            }
         }
     }
     
     //orion:new
     func getImageForStyle(_ imagePath: String) -> UIImage {
         var imageName: String = ""
-     
+
         switch PokeboxStyle.getStyle() {
         case .defaultStyle:
             if target.traitCollection.userInterfaceStyle == .light {
-                imageName = "Pokeballs.png"
+                imageName = "Pokeballs-Border.png"
             } else {
-                imageName = "Pokeballs-Dark.png"
+                imageName = "Pokeballs-Dark-Border.png"
             }
             
-        case .lightStyle: imageName = "Pokeballs.png"
-        case .darkStyle: imageName = "Pokeballs-Dark.png"
+        case .lightStyle: imageName = "Pokeballs-Border.png"
+        case .darkStyle: imageName = "Pokeballs-Dark-Border.png"
         }
         
         if let image = UIImage(contentsOfFile: imagePath + imageName) {
@@ -198,6 +227,20 @@ class NCNotificationHook: ClassHook<NCNotificationShortLookViewController> {
         } else {
             remLog("Fetching image Failed.")
             return UIImage()
+        }
+    }
+    
+    //orion:new
+    func headerViewColor() -> UIColor {
+        switch PokeboxStyle.getStyle() {
+        case .defaultStyle:
+            if target.traitCollection.userInterfaceStyle == .light {
+                return UIColor.white
+            } else {
+                return UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
+            }
+        case .lightStyle: return UIColor.white
+        case .darkStyle: return UIColor(red: 30/255, green: 30/255, blue: 30/255, alpha: 1.0)
         }
     }
 }
@@ -220,7 +263,7 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
         orig.layoutSubviews()
         
         if tweakPrefs.isOffsetEnabled {
-            Ivars<UILabel>(target)._secondaryTextElement.frame.origin.y += CGFloat(2.0)
+            Ivars<UILabel>(target)._secondaryTextElement.frame.origin.y += CGFloat(tweakPrefs.offsetValue)
         }
     }
     
@@ -244,27 +287,21 @@ class NCNotificationLabelsHook: ClassHook<NCNotificationSeamlessContentView> {
             let secondaryTextElement: UILabel = Ivars<UILabel>(target)._secondaryTextElement
             secondaryTextElement.font = getFontForStyle(CGFloat(tweakPrefs.textSize))
             
-            if let newTextColor = setTextColor() {
-                primaryTextLabel.textColor = newTextColor
-                primarySubtitleTextLabel.textColor = newTextColor
-                footerTextLabel.textColor = newTextColor
-                secondaryTextElement.textColor = newTextColor
+            if !isVelvetInstalled {
+                if let newTextColor = setTextColor() {
+                    primaryTextLabel.textColor = newTextColor
+                    primarySubtitleTextLabel.textColor = newTextColor
+                    footerTextLabel.textColor = newTextColor
+                    secondaryTextElement.textColor = newTextColor
+                }
             }
         }
-        return orig._textFrameForBounds(frame)
+        return orig._textFrameForBounds(frame).insetBy(dx: 0, dy: 4)
     }
     
     func sizeThatFits(_ size: CGSize) -> CGSize {
         let origSize = orig.sizeThatFits(size)
-        if #unavailable(iOS 16) {
-            let newSize: CGRect = {
-                switch origSize.height {
-                case 0...60: return CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height).insetBy(dx: 0, dy: -4)
-                default: return CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height).insetBy(dx: 0, dy: -2)
-                }
-            }()
-            return newSize.size
-        } else { return origSize }
+        return CGRect(x: 0, y: 0, width: origSize.width, height: origSize.height).insetBy(dx: 0, dy: -4).size
     }
     
     //orion:new

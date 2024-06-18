@@ -9,4 +9,5 @@ struct SettingsModel: DictionaryConvertor, Codable {
     var textSize: Int = 14
     var animationSpeed: Float = 0.10
     var isOffsetEnabled: Bool = false
+    var offsetValue: Int = 4
 }

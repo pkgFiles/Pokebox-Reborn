@@ -9,6 +9,15 @@ let defaultAssetsPath: String = {
     return path
 }()
 
+let defaultDylibPath: String = {
+    var path: String = "/var/jb/Library/MobileSubstrate/DynamicLibraries/"
+    if !FileManager.default.fileExists(atPath: path, isDirectory: UnsafeMutablePointer<ObjCBool>.allocate(capacity: 1)) {
+        path = "/Library/MobileSubstrate/DynamicLibraries/"
+    }
+    
+    return path
+}()
+
 extension UIView {
 
     // Using a function since `var image` might conflict with an existing variable

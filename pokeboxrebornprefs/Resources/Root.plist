@@ -184,6 +184,24 @@
 		</dict>
 		<dict>
 			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>default</key>
+			<real>4</real>
+			<key>defaults</key>
+			<string>com.pkgfiles.pokeboxrebornprefs</string>
+			<key>key</key>
+			<string>offsetValue</string>
+			<key>min</key>
+			<real>3</real>
+			<key>max</key>
+			<real>5</real>
+			<key>isSegmented</key>
+			<true/>
+			<key>segmentCount</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
 			<string>Send Test Notification</string>
