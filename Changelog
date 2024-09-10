@@ -1,0 +1,31 @@
+2.0.1
+Fixed a potential memory leak caused by incorrect invalidation of timers
+
+2.0
+Added Velvet2 compatibility layer
+Fixed the alignment of the title which can cause overlapping
+Readded the offset slider which works fine since the autoresizing function
+Removed assets which are no longer needed
+Bugfixes and improvements
+
+1.1.1
+Fixed dependencies dont get installed with the tweak
+This should fix that some people was never be able to use this tweak
+
+1.1
+Fixed notification size on iOS 15 devices
+Fixed the realignment of some Labels by rewriting the mechanism for their color change
+Improved performance
+Removed unused code for the animations as they work fine
+
+1.0.2
+Fixed images from having the wrong insets on iOS 15
+Added autoresizing of images, line-by-line
+Removed the Offset Slider as the values are to high and cause visual glitches
+Cleaning up some parts of the code
+
+1.0.1
+Fixed rootful support
+
+1.0
+Initial Release
