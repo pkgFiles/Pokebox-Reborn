@@ -5,7 +5,7 @@ import PokeboxRebornC
 //Rewrite for modern iOS 15.0 - 16.7.5
 //based on original from @Skittyblock: https://github.com/Skittyblock/Pokebox
 //MARK: - Variables
-let tweakPrefs: SettingsModel = TweakPreferences.preferences.settings
+var tweakPrefs: SettingsModel = SettingsModel()
 var isVelvetInstalled: Bool = false
 
 // MARK: - Enums
@@ -41,16 +41,10 @@ enum PokeboxFont {
 
 // MARK: - Initialize Tweak
 struct TweakEnabled: HookGroup { let isTweakEnabled: Bool }
-struct LoadingTweak: Tweak {
-    
+struct PokeboxReborn: Tweak {
     init() {
-        do {
-            remLog("Preferences Loading...")
-            try TweakPreferences.preferences.loadPreferences()
-        } catch let error as NSError {
-            remLog(error.localizedDescription)
-            return
-        }
+        remLog("Preferences Loading...")
+        tweakPrefs = TweakPreferences.preferences.loadPreferences()
         
         let pokeboxTweak = TweakEnabled(isTweakEnabled: tweakPrefs.isEnabled)
         if pokeboxTweak.isTweakEnabled {
